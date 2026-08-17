@@ -130,8 +130,10 @@
   }
 
   // ---------- 轮询任务状态（避免长连接被代理掐断）----------
+  const POLL_TIMEOUT_MS = 15 * 60 * 1000; // 15 分钟兜底，避免无限转圈
   function pollStatus(job_id) {
     const myToken = ++pollToken;
+    const start = Date.now();
     async function tick() {
       if (myToken !== pollToken) return; // 已有更新的上传，停止旧轮询
       try {
@@ -155,6 +157,14 @@
           return;
         }
         if (st.status === "pending") overlayText.textContent = "任务排队中（等待 GPU）…";
+        if (Date.now() - start > POLL_TIMEOUT_MS) {
+          overlay.hidden = true;
+          $("phPreview").hidden = false;
+          $("mdRender").innerHTML =
+            `<p style="color:#e5484d">解析超过 15 分钟仍未完成，已停止等待。</p>` +
+            `<p class="muted">可在服务器终端手动查询：<code>curl http://127.0.0.1:8000/api/status/${job_id}</code></p>`;
+          return;
+        }
         setTimeout(tick, 1500);
       } catch (e) {
         overlay.hidden = true;

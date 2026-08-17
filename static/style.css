@@ -15,6 +15,10 @@
 
 * { box-sizing: border-box; }
 
+/* 关键修复：author 的 display 规则会覆盖 UA 的 [hidden]{display:none}，
+   导致 overlay/preview-card 等带了 hidden 属性的元素仍显示。这里强制 hidden 生效。 */
+[hidden] { display: none !important; }
+
 html, body {
   margin: 0;
   padding: 0;

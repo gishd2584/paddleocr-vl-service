@@ -53,6 +53,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+@app.middleware("http")
+async def no_cache_static(request, call_next):
+    """首页与静态资源不缓存，确保部署后浏览器立即拿到最新的前端文件。"""
+    resp = await call_next(request)
+    path = request.url.path
+    if path == "/" or path.startswith("/static/") or path.startswith("/api/"):
+        resp.headers["Cache-Control"] = "no-store"
+    return resp
+
 # 推理锁：同一时刻只跑一条流水线，保护单卡显存
 _infer_lock = asyncio.Lock()
 # 流水线缓存：相同配置复用同一个已加载的模型
