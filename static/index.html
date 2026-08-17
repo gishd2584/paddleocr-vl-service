@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PaddleOCR-VL 文档解析</title>
+  <link rel="stylesheet" href="/static/style.css" />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo" aria-hidden="true">
+        <svg viewBox="0 0 32 32" width="28" height="28">
+          <rect x="3" y="3" width="26" height="26" rx="7" fill="url(#g)"/>
+          <path d="M10 11h12M10 16h12M10 21h8" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>
+          <defs>
+            <linearGradient id="g" x1="0" y1="0" x2="32" y2="32">
+              <stop offset="0" stop-color="#3b6cff"/>
+              <stop offset="1" stop-color="#1fb6c9"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </span>
+      <div class="brand-text">
+        <h1>PaddleOCR-VL 文档解析</h1>
+        <p>上传图片 / PDF，自动解析为结构化 Markdown</p>
+      </div>
+    </div>
+    <div class="topbar-meta" id="meta">连接中…</div>
+  </header>
+
+  <main class="layout">
+    <!-- 左侧：上传 + 原文预览 -->
+    <section class="panel left">
+      <div class="card">
+        <div class="dropzone" id="dropzone">
+          <input type="file" id="fileInput" accept="image/*,application/pdf" hidden />
+          <div class="dz-inner">
+            <div class="dz-icon">⬆</div>
+            <p class="dz-title">拖拽文件到此处，或 <span class="link">点击选择</span></p>
+            <p class="dz-sub">支持 PNG / JPG / WEBP / BMP / PDF</p>
+          </div>
+        </div>
+
+        <div class="advanced">
+          <button type="button" class="adv-toggle" id="advToggle">高级选项 ▾</button>
+          <div class="adv-body" id="advBody" hidden>
+            <label class="row">
+              <span>推理设备</span>
+              <select id="device">
+                <option value="gpu:1">gpu:1</option>
+                <option value="gpu:0">gpu:0</option>
+                <option value="gpu:2">gpu:2</option>
+                <option value="gpu:3">gpu:3</option>
+                <option value="cpu">cpu</option>
+              </select>
+            </label>
+            <label class="row">
+              <span>模型版本</span>
+              <select id="version">
+                <option value="">默认</option>
+                <option value="v1.5">v1.5</option>
+                <option value="v1.6">v1.6</option>
+              </select>
+            </label>
+            <label class="row check">
+              <input type="checkbox" id="layout" checked />
+              <span>版面区域检测排序</span>
+            </label>
+            <label class="row check">
+              <input type="checkbox" id="orient" />
+              <span>文档方向分类</span>
+            </label>
+            <label class="row check">
+              <input type="checkbox" id="unwarp" />
+              <span>文本图像矫正</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="card preview-card" id="previewCard" hidden>
+        <div class="card-head">
+          <span>原文预览</span>
+          <span class="muted" id="fileName"></span>
+        </div>
+        <div class="preview-body" id="previewBody"></div>
+      </div>
+    </section>
+
+    <!-- 右侧：解析结果 -->
+    <section class="panel right">
+      <div class="card result-card">
+        <div class="card-head tabs-head">
+          <div class="tabs" id="tabs">
+            <button class="tab active" data-tab="preview">解析预览</button>
+            <button class="tab" data-tab="md">Markdown 源码</button>
+            <button class="tab" data-tab="json">JSON</button>
+          </div>
+          <div class="actions">
+            <button class="btn" id="dlMd" disabled>下载 Markdown</button>
+            <button class="btn" id="dlJson" disabled>下载 JSON</button>
+          </div>
+        </div>
+
+        <div class="result-body">
+          <div class="tab-pane active" id="pane-preview">
+            <div class="placeholder" id="phPreview">
+              <p>解析结果将显示在这里。</p>
+              <p class="muted">上传文件后自动开始解析。</p>
+            </div>
+            <article class="markdown" id="mdRender"></article>
+          </div>
+          <div class="tab-pane" id="pane-md">
+            <pre class="code" id="mdRaw"></pre>
+          </div>
+          <div class="tab-pane" id="pane-json">
+            <pre class="code" id="jsonRaw"></pre>
+          </div>
+        </div>
+
+        <div class="files-foot" id="filesFoot" hidden>
+          <span class="muted">全部产物：</span>
+          <span id="fileLinks"></span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 解析中遮罩 -->
+  <div class="overlay" id="overlay" hidden>
+    <div class="spinner"></div>
+    <p id="overlayText">解析中…</p>
+    <p class="muted">首次运行会自动下载模型权重，请稍候。</p>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>
